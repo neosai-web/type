@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>タイポグリセミア変換ソフト v1.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=MS+Gothic&family=DotGothic16&display=swap');
+
+        body {
+            background-color: #008080; /* Classic Win95 Teal Desktop Background */
+            font-family: 'MS Gothic', 'MS PGothic', monospace, sans-serif;
+            user-select: none;
+        }
+
+        /* Win95 3D Bevel Effects */
+        .win95-window {
+            background-color: #C0C0C0;
+            border-top: 2px solid #FFFFFF;
+            border-left: 2px solid #FFFFFF;
+            border-right: 2px solid #808080;
+            border-bottom: 2px solid #808080;
+            box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+        }
+
+        .win95-button {
+            background-color: #C0C0C0;
+            border-top: 2px solid #FFFFFF;
+            border-left: 2px solid #FFFFFF;
+            border-right: 2px solid #404040;
+            border-bottom: 2px solid #404040;
+            box-shadow: inset 1px 1px #DFDFDF, inset -1px -1px #808080;
+            cursor: pointer;
+            active: border-top: 2px solid #404040;
+            active: border-left: 2px solid #404040;
+            active: border-right: 2px solid #FFFFFF;
+            active: border-bottom: 2px solid #FFFFFF;
+        }
+
+        .win95-button:active, .win95-button.pressed {
+            border-top: 2px solid #808080;
+            border-left: 2px solid #808080;
+            border-right: 2px solid #FFFFFF;
+            border-bottom: 2px solid #FFFFFF;
+            padding-top: 3px;
+            padding-left: 3px;
+        }
+
+        .win95-inset {
+            background-color: #FFFFFF;
+            border-top: 2px solid #808080;
+            border-left: 2px solid #808080;
+            border-right: 2px solid #FFFFFF;
+            border-bottom: 2px solid #FFFFFF;
+        }
+
+        .win95-statusbar {
+            background-color: #C0C0C0;
+            border-top: 1px solid #808080;
+            border-left: 1px solid #808080;
+            border-right: 1px solid #FFFFFF;
+            border-bottom: 1px solid #FFFFFF;
+        }
+
+        .title-bar-gradient {
+            background: linear-gradient(90deg, #000080, #1084d0);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-2 sm:p-4">
+
+    <div class="win95-window w-full max-w-2xl flex flex-col text-black text-xs sm:text-sm">
+        
+        <!-- Window Title Bar -->
+        <div class="title-bar-gradient text-white px-2 py-1 flex justify-between items-center select-none font-bold">
+            <div class="flex items-center space-x-1">
+                <span class="inline-block w-4 h-4 bg-gray-300 text-black text-center leading-4 text-[10px] font-bold border border-white">T</span>
+                <span>タイポグリセミア変換ソフト v1.0</span>
+            </div>
+            <div class="flex space-x-1">
+                <button class="win95-button w-5 h-5 text-black font-bold flex items-center justify-center bg-[#C0C0C0] text-xs">_</button>
+                <button class="win95-button w-5 h-5 text-black font-bold flex items-center justify-center bg-[#C0C0C0] text-xs">□</button>
+                <button class="win95-button w-5 h-5 text-black font-bold flex items-center justify-center bg-[#C0C0C0] text-xs" onclick="clearAll()">×</button>
+            </div>
+        </div>
+
+        <!-- Menu Bar -->
+        <div class="bg-[#C0C0C0] px-1 py-0.5 flex space-x-3 border-b border-gray-400 text-xs">
+            <span class="hover:bg-blue-800 hover:text-white px-1 cursor-pointer">ファイル(<u>F</u>)</span>
+            <span class="hover:bg-blue-800 hover:text-white px-1 cursor-pointer">編集(<u>E</u>)</span>
+            <span class="hover:bg-blue-800 hover:text-white px-1 cursor-pointer" onclick="showHelp()">ヘルプ(<u>H</u>)</span>
+        </div>
+
+        <!-- Application Content Area -->
+        <div class="p-3 sm:p-4 flex flex-col space-y-3 bg-[#C0C0C0]">
+            
+            <!-- Input Text Section -->
+            <div class="flex flex-col space-y-1">
+                <label for="inputText" class="font-bold">変換前テキスト:</label>
+                <textarea id="inputText" rows="4" class="win95-inset w-full p-2 text-black font-mono resize-none focus:outline-none" placeholder="ここに文章を入力してください（例：私は今日、公園で美味しいリンゴを食べました。）">私は今日、公園で美味しいリンゴを食べました。</textarea>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex justify-center space-x-4 my-1">
+                <button onclick="transformText()" class="win95-button px-6 py-1.5 font-bold bg-[#C0C0C0] active:bg-gray-400">
+                    変換 (Transform)
+                </button>
+                <button onclick="clearText()" class="win95-button px-6 py-1.5 font-bold bg-[#C0C0C0] active:bg-gray-400">
+                    クリア (Clear)
+                </button>
+                <button onclick="copyOutput()" class="win95-button px-4 py-1.5 font-bold bg-[#C0C0C0] active:bg-gray-400">
+                    コピー
+                </button>
+            </div>
+
+            <!-- Output Text Section -->
+            <div class="flex flex-col space-y-1">
+                <label for="outputText" class="font-bold">変換後テキスト:</label>
+                <textarea id="outputText" rows="4" readonly class="win95-inset w-full p-2 text-black font-mono resize-none bg-gray-50 focus:outline-none" placeholder="ここに変換結果が表示されます"></textarea>
+            </div>
+
+        </div>
+
+        <!-- Status Bar -->
+        <div class="win95-statusbar px-2 py-1 text-xs text-black flex items-center justify-between">
+            <span id="statusText">準備完了</span>
+            <span class="border-l border-r border-gray-500 px-2 text-[11px]">Win95 Typoglycemia Engine</span>
+        </div>
+
+    </div>
+
+    <script>
+        /**
+         * Fisher-Yates shuffle algorithm to randomize array elements
+         */
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        /**
+         * Apply typoglycemia effect to a single word/token block
+         * Rules:
+         * 1. If length < 3, keep as is.
+         * 2. Keep first and last characters fixed.
+         * 3. Shuffle middle characters.
+         * 4. If result equals original, retry until different (if length >= 4).
+         */
+        function processTypoglycemiaBlock(token) {
+            // Check if token consists purely of word characters (English letters, Japanese letters)
+            // Let's match blocks of consecutive alphanumeric or Japanese characters (Kanji, Hiragana, Katakana)
+            if (token.length < 3) {
+                return token;
+            }
+
+            const firstChar = token[0];
+            const lastChar = token[token.length - 1];
+            const middleChars = token.slice(1, token.length - 1).split('');
+
+            // If all middle characters are identical, shuffling won't change it
+            const allSame = middleChars.every(char => char === middleChars[0]);
+            if (allSame || middleChars.length <= 1) {
+                return token;
+            }
+
+            let shuffledMiddle = '';
+            let attempts = 0;
+            const maxAttempts = 20;
+
+            do {
+                const temp = [...middleChars];
+                shuffleArray(temp);
+                shuffledMiddle = temp.join('');
+                attempts++;
+            } while (shuffledMiddle === middleChars.join('') && attempts < maxAttempts);
+
+            return firstChar + shuffledMiddle + lastChar;
+        }
+
+        /**
+         * Main Typoglycemia transformation function
+         * Splits text into blocks of words/characters while preserving spaces and punctuation.
+         */
+        function applyTypoglycemia(text) {
+            // Regex to split by linguistic blocks: English words or contiguous Japanese characters/symbols blocks, keeping separators
+            // We can match sequences of alphanumeric characters or Japanese character ranges.
+            // Range for Japanese: Hiragana, Katakana, CJK Unified Ideographs (Kanji)
+            const regex = /([a-zA-Z0-9\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]+)/g;
+
+            return text.replace(regex, (match) => {
+                return processTypoglycemiaBlock(match);
+            });
+        }
+
+        /**
+         * Button handler for text transformation
+         */
+        function transformText() {
+            const input = document.getElementById('inputText').value;
+            if (!input.trim()) {
+                document.getElementById('statusText').innerText = 'エラー: テキストが入力されていません。';
+                return;
+            }
+
+            const transformed = applyTypoglycemia(input);
+            document.getElementById('outputText').value = transformed;
+            document.getElementById('statusText').innerText = '変換しました。';
+        }
+
+        /**
+         * Clear inputs and outputs
+         */
+        function clearText() {
+            document.getElementById('inputText').value = '';
+            document.getElementById('outputText').value = '';
+            document.getElementById('statusText').innerText = '準備完了';
+        }
+
+        function clearAll() {
+            clearText();
+        }
+
+        /**
+         * Copy output text safely using document.execCommand
+         */
+        function copyOutput() {
+            const outputBox = document.getElementById('outputText');
+            if (!outputBox.value) {
+                document.getElementById('statusText').innerText = 'コピーするテキストがありません。';
+                return;
+            }
+            outputBox.select();
+            try {
+                document.execCommand('copy');
+                document.getElementById('statusText').innerText = 'クリップボードにコピーしました。';
+            } catch (err) {
+                document.getElementById('statusText').innerText = 'コピーに失敗しました。';
+            }
+        }
+
+        /**
+         * Help dialog simulator in retro style
+         */
+        function showHelp() {
+            document.getElementById('statusText').innerText = 'ヘルプ: 最初と最後の文字を固定し間をシャッフルします。';
+        }
+    </script>
+</body>
+</html>
